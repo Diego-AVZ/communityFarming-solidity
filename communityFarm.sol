@@ -8,7 +8,7 @@ contract factory{
 
     function createYourContractBTC_USDT(string memory contractName) public {
         address newContractOwner = msg.sender;
-        socialFarming newSocialFarming = new socialFarming(
+        communityFarm newSocialFarming = new communityFarm(
             newContractOwner,
             contractName, 
             0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9 /*USDT*/, 
@@ -23,7 +23,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 
-contract socialFarming {
+
+contract communityFarm {
 
     string public contractName;
     IERC20 public tokenA;
@@ -34,6 +35,9 @@ contract socialFarming {
         contractName = _contractName;
         tokenA = IERC20(_tokenA);
         tokenB = IERC20(_tokenB);
+        dataFeed = AggregatorV3Interface(
+            0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43
+        );
     }
 
     address public owner;
@@ -102,4 +106,16 @@ contract socialFarming {
         hasDepoB = false; hasDepoA = false;
     }
 
+    AggregatorV3Interface internal dataFeed;
+
+    function getTokenAPrice() public view returns(int){
+        ( , int answer, , ,) = dataFeed.latestRoundData();
+        return(answer);
+    }
+    
+    int priceTokenA;
+
+    function setPriceA() public {
+       priceTokenA = getTokenAPrice();
+    }
 }
