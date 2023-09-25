@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 contract factory{
 
     mapping(string => address) public searchContractName;
-    
 
     function createYourContractBTC_USDT(string memory contractName) public {
         address newContractOwner = msg.sender;
@@ -21,7 +20,6 @@ contract factory{
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
 
 
 contract communityFarm {
@@ -66,12 +64,6 @@ contract communityFarm {
         totalAmountB = totalAmountB + amount;
     }
 
-    uint public timeLocked;
-
-    function setLockTime(uint _timelocked) public {
-        timeLocked = _timelocked * 1 days;
-    }
-
     mapping(address => uint) public depositsA;
     mapping(address => uint) public depositsB;
     bool hasDepoA;
@@ -106,6 +98,15 @@ contract communityFarm {
         hasDepoB = false; hasDepoA = false;
     }
 
+    /*
+    
+    - Cada usuario podría retirar su liquidez en cualquier momento con el IL que haya
+    - 
+
+    */
+
+    /*
+
     AggregatorV3Interface internal dataFeed;
 
     function getTokenAPrice() public view returns(int){
@@ -118,4 +119,49 @@ contract communityFarm {
     function setPriceA() public {
        priceTokenA = getTokenAPrice();
     }
+
+*/
+
+    //poolActionsUniV3 
+    /*
+
+    address public uniswapPool; 
+
+    function setPool(address poolAddr) public{
+        uniswapPool = poolAddr;
+    }
+
+    function addLiquidity(int24 tickLower, int24 tickUpper, uint128 amount) public onlyOwner{
+        
+
+        (uint256 amount0, uint256 amount1) = IUniswapV3PoolActions(uniswapPool).mint(
+            address(this),
+            tickLower,
+            tickUpper,
+            amount,
+            bytes("")
+        );
+
+        totalAmountA = totalAmountA - amount0;
+        totalAmountB = totalAmountB - amount1;
+        
+    }
 }
+
+
+//UNISWAP INTERFACE
+
+interface IUniswapV3PoolActions {
+    function initialize(uint160 sqrtPriceX96) external;
+
+    function mint( address recipient, int24 tickLower, int24 tickUpper, uint128 amount, bytes calldata data
+    ) external returns (uint256 amount0, uint256 amount1);
+
+    function collect( address recipient, int24 tickLower, int24 tickUpper, uint128 amount0Requested, uint128 amount1Requested
+    ) external returns (uint128 amount0, uint128 amount1);
+
+    function burn( int24 tickLower, int24 tickUpper, uint128 amount
+    ) external returns (uint256 amount0, uint256 amount1);
+
+}
+*/
