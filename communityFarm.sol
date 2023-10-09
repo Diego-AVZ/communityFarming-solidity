@@ -45,22 +45,22 @@ contract communityFarm {
         _;
     }
 
-    uint public ownerColateralA;
-    uint public ownerColateralB;
+    uint public ownerAmountA;
+    uint public ownerAmountB;
     uint public totalAmountA;
     uint public totalAmountB;
 
     function depositOwnerColTokenA(uint amount) public onlyOwner{
         require(tokenA.approve(address(this), amount), "Approval failed");
         require(tokenA.transferFrom(msg.sender, address(this), amount));
-        ownerColateralA = ownerColateralA + amount;
+        ownerAmountA = ownerAmountA + amount;
         totalAmountA = totalAmountA + amount;
     }
 
     function depositOwnerColTokenB(uint amount) public onlyOwner{
         require(tokenB.approve(address(this), amount), "Approval failed");
         require(tokenB.transferFrom(msg.sender, address(this), amount));
-        ownerColateralB = ownerColateralB + amount;
+        ownerAmountB = ownerAmountB + amount;
         totalAmountB = totalAmountB + amount;
     }
 
@@ -68,6 +68,8 @@ contract communityFarm {
     mapping(address => uint) public depositsB;
     bool hasDepoA;
     bool hasDepoB;
+
+	//Ideal sería que los usuarios depositen 50 A : 50 B 
 
     function depositTokenA(uint amount) public{
         require(hasDepoA == false);
@@ -97,6 +99,79 @@ contract communityFarm {
         totalAmountB = totalAmountB - depositsB[msg.sender];
         hasDepoB = false; hasDepoA = false;
     }
+
+	struct position {
+		uint date;
+		int priceA;
+		uint percentA;
+		uint percentB;
+	}
+
+	position[] positions;
+
+	function addLiquidityToUni(uint amountLiqA, uint amountLiqB) public onlyOwner{
+		/*
+		Lógica para enviar a la  pool de Uniswap
+		*/
+		//registrar: del 'totalAmountA' y 'totalAmountB' los % que se han usado
+		uint percA = amountLiqA*100 / totalAmountA; // Lo que se ha usado en la operación
+		uint percB = amountLiqB*100 / totalAmountB;
+
+		position memory newPos = position(block.timestamp, getTokenAPrice(), percA, percB);
+		positions.push(newPos);
+
+		//percA y percB son los % que se usan y que se aplicarán a lo usado de cada usuario
+
+	}
+
+	function claimFromUni() public onlyOwner {
+		/*
+			Lógica para claimear
+		*/
+		//Registrar la cantidad total de recompensas. se alamacena la recompensa en el contrato
+		//se reparten las recompensas entre los usuarios proveedores
+		uint totalRewards;
+		//Hay que calcular el porcentaje de liquidez que ha depositado cada usuario respecto al total
+		uint totalLiq = calcTotalLiq();
+		uint userPerc = calcPercDepUsers(msg.sender);
+
+		
+
+	}
+
+	struct depositsPerUser {
+		address user;
+		uint amountAInDol;
+		uint amountB;
+	}
+
+	depositsPerUser public depoPerUser;
+
+	depositsPerUser[] depositList;
+
+	function calcPercDepUsers(address user) public view returns(uint) {
+		for (uint32 i = 0; i < depositList.length; i++) {
+			if (user == depoPerUser.user){
+				uint percent = (uint(depoPerUser.amountAInDol) + uint(depoPerUser.amountB))*100 / calcTotalLiq();
+			}
+		}
+	}
+
+	function calcTotalLiq() public view returns(uint) {
+		return(totalAmountA * uint(getTokenAPrice()) + totalAmountB);
+	}
+
+	AggregatorV3Interface internal dataFeed;
+
+    function getTokenAPrice() public view returns(int){
+        ( , int answer, , ,) = dataFeed.latestRoundData();
+        return(answer);
+    }
+
+	
+
+
+}
 
     /*
     
@@ -164,4 +239,5 @@ interface IUniswapV3PoolActions {
     ) external returns (uint256 amount0, uint256 amount1);
 
 }
+
 */
