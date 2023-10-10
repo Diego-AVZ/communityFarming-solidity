@@ -69,25 +69,26 @@ contract communityFarm {
     bool hasDepoA;
     bool hasDepoB;
 
-	//Ideal sería que los usuarios depositen 50 A : 50 B 
-
-    function depositTokenA(uint amount) public{
-        require(hasDepoA == false);
-        require(tokenA.approve(address(this), amount), "Approval failed");
-        require(tokenA.transferFrom(msg.sender, address(this), amount));
-        depositsA[msg.sender] = depositsA[msg.sender] + amount;
-        totalAmountA = totalAmountA + amount;
+	function depositTokens(uint amountA, uint amountB) public{
+		//Token A
+		require(tokenA.approve(address(this), amountA), "Approval failed");
+        require(tokenA.transferFrom(msg.sender, address(this), amountA));
+        depositsA[msg.sender] = depositsA[msg.sender] + amountA;
+        totalAmountA = totalAmountA + amountA;
         hasDepoA = true;
-    }
 
-    function depositTokenB(uint amount) public{
-        require(hasDepoB == false);
-        require(tokenB.approve(address(this), amount), "Approval failed");
-        require(tokenB.transferFrom(msg.sender, address(this), amount));
-        depositsB[msg.sender] = depositsB[msg.sender] + amount;
-        totalAmountB = totalAmountB + amount;
+		//Token B
+		require(tokenB.approve(address(this), amountB), "Approval failed");
+        require(tokenB.transferFrom(msg.sender, address(this), amountB));
+        depositsB[msg.sender] = depositsB[msg.sender] + amountB;
+        totalAmountB = totalAmountB + amountB;
         hasDepoB = true;
-    }
+
+		uint amountAInDol = amountA * uint(getTokenAPrice());
+
+		depositsPerUser memory newDepositsStruct = depositsPerUser(msg.sender, amountAInDol, amountB);
+		depositList.push(newDepositsStruct);
+	}
 
     function withdrawAllDeposits() public { // Dependiendo de la opcion elegida, aqui habría que calcular el IL
         require(hasDepoA || hasDepoB);
@@ -130,19 +131,24 @@ contract communityFarm {
 		*/
 		//Registrar la cantidad total de recompensas. se alamacena la recompensa en el contrato
 		//se reparten las recompensas entre los usuarios proveedores
-		uint totalRewards;
+		uint totalFeesFromUni;
 		//Hay que calcular el porcentaje de liquidez que ha depositado cada usuario respecto al total
 		uint totalLiq = calcTotalLiq();
-		uint userPerc = calcPercDepUsers(msg.sender);
-
 		
+		//Repartir por % a Owner, a MyWallet y a cada user
+		for(uint i = depositList.length - 1; i > 0; i--) {
+			depositsPerUser memory depoPerUser2 = depositList[i];
+			uint userPerc = calcPercDepUsers(depoPerUser2.user);
+			tokenA.transferFrom(address(this), depoPerUser2.user, totalFeesFromUni*userPerc);
+			tokenB.transferFrom(address(this), depoPerUser2.user, totalFeesFromUni*userPerc);
+		}
 
 	}
 
 	struct depositsPerUser {
 		address user;
 		uint amountAInDol;
-		uint amountB;
+		uint amountBInDol; // Is Stablecoin
 	}
 
 	depositsPerUser public depoPerUser;
@@ -152,7 +158,7 @@ contract communityFarm {
 	function calcPercDepUsers(address user) public view returns(uint) {
 		for (uint32 i = 0; i < depositList.length; i++) {
 			if (user == depoPerUser.user){
-				uint percent = (uint(depoPerUser.amountAInDol) + uint(depoPerUser.amountB))*100 / calcTotalLiq();
+				uint percent = (uint(depoPerUser.amountAInDol) + uint(depoPerUser.amountBInDol))*100 / calcTotalLiq();
 			}
 		}
 	}
