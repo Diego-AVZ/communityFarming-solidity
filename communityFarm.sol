@@ -259,6 +259,9 @@ contract communityFarm {
 
 }
 
+//Considera añadir una función de seguro de IL donde el owner deposita un colateral que se hace cargo del IL de los usuarios con un incentivo de fee
+
+
     /*
     
     - Cada usuario podría retirar su liquidez en cualquier momento con el IL que haya
