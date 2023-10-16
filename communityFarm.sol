@@ -80,17 +80,17 @@ contract communityFarm {
 	function depositTokens(uint amountA, uint amountB) public{
 		//Token A
 		require(tokenA.approve(address(this), amountA), "Approval failed");
-        require(tokenA.transferFrom(msg.sender, address(this), amountA));
-        depositsA[msg.sender] = depositsA[msg.sender] + amountA;
-        totalAmountA = totalAmountA + amountA;
-        hasDepoA = true;
+	        require(tokenA.transferFrom(msg.sender, address(this), amountA));
+	        depositsA[msg.sender] = depositsA[msg.sender] + amountA;
+	        totalAmountA = totalAmountA + amountA;
+	        hasDepoA = true;
 
 		//Token B
 		require(tokenB.approve(address(this), amountB), "Approval failed");
-        require(tokenB.transferFrom(msg.sender, address(this), amountB));
-        depositsB[msg.sender] = depositsB[msg.sender] + amountB;
-        totalAmountB = totalAmountB + amountB;
-        hasDepoB = true;
+	        require(tokenB.transferFrom(msg.sender, address(this), amountB));
+	        depositsB[msg.sender] = depositsB[msg.sender] + amountB;
+	        totalAmountB = totalAmountB + amountB;
+	        hasDepoB = true;
 
 		uint amountAInDol = amountA * uint(getTokenAPrice());
 
@@ -147,13 +147,13 @@ contract communityFarm {
 		}
 
 		totalAmountA = totalAmountA - depositsA[msg.sender];
-        totalAmountB = totalAmountB - depositsB[msg.sender]; // Se resta lo que habían depositado
+        	totalAmountB = totalAmountB - depositsB[msg.sender]; // Se resta lo que habían depositado
 		
 		require(tokenA.transferFrom(address(this), msg.sender, depositsA[msg.sender]));
 		require(tokenB.transferFrom(address(this), msg.sender, depositsB[msg.sender]));
 
 		depositsA[msg.sender] = 0;                           // Despues se iguala a 0
-        depositsB[msg.sender] = 0;
+       		depositsB[msg.sender] = 0;
 		
 	}
 
